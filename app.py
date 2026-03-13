@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-import altair as alt
+import plotly.express as px
 import base64
 import mimetypes
 import numpy as np
@@ -173,25 +173,22 @@ elif st.session_state.page == "historical":
 
     daily_sales = df.groupby("Order Date")["Sales"].sum().reset_index()
 
-    history_chart = (
-        alt.Chart(daily_sales)
-        .mark_line(color="#2563eb", strokeWidth=3)
-        .encode(
-            x=alt.X("Order Date:T", title="Date"),
-            y=alt.Y("Sales:Q", title="Sales"),
-            tooltip=[
-                alt.Tooltip("Order Date:T", title="Order Date"),
-                alt.Tooltip("Sales:Q", title="Sales", format=",.2f"),
-            ],
-        )
-        .properties(height=500)
-        .configure(background=PLOT_BG)
-        .configure_view(fill=PLOT_BG, stroke=PLOT_BG)
-        .configure_axis(labelColor="#374151", titleColor="#374151", gridColor=PLOT_GRID)
-        .configure_title(color="#374151")
+    history_chart = px.line(
+        daily_sales,
+        x="Order Date",
+        y="Sales",
+        title="",
     )
-
-    st.altair_chart(history_chart, use_container_width=True, theme=None)
+    history_chart.update_traces(line_color="#2563eb", line_width=3)
+    history_chart.update_layout(
+        height=500,
+        plot_bgcolor=PLOT_BG,
+        paper_bgcolor=PLOT_BG,
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis=dict(title="Date", gridcolor=PLOT_GRID, color="#374151"),
+        yaxis=dict(title="Sales", gridcolor=PLOT_GRID, color="#374151"),
+    )
+    st.plotly_chart(history_chart, use_container_width=True)
 
     st.divider()
     st.markdown("<div class='chart-title'>Model Used</div>", unsafe_allow_html=True)
@@ -241,22 +238,19 @@ elif st.session_state.page == "historical":
     future_predictions = model.predict(future_df[features])
     future_df["Predicted Sales"] = future_predictions
 
-    forecast_chart = (
-        alt.Chart(future_df)
-        .mark_line(color="#f97316", strokeWidth=3)
-        .encode(
-            x=alt.X("Order Date:T", title="Date"),
-            y=alt.Y("Predicted Sales:Q", title="Predicted Sales"),
-            tooltip=[
-                alt.Tooltip("Order Date:T", title="Date"),
-                alt.Tooltip("Predicted Sales:Q", title="Predicted Sales", format=",.2f"),
-            ],
-        )
-        .properties(height=460)
-        .configure(background=PLOT_BG)
-        .configure_view(fill=PLOT_BG, stroke=PLOT_BG)
-        .configure_axis(labelColor="#374151", titleColor="#374151", gridColor=PLOT_GRID)
-        .configure_title(color="#374151")
+    forecast_chart = px.line(
+        future_df,
+        x="Order Date",
+        y="Predicted Sales",
+        title="",
     )
-
-    st.altair_chart(forecast_chart, use_container_width=True, theme=None)
+    forecast_chart.update_traces(line_color="#f97316", line_width=3)
+    forecast_chart.update_layout(
+        height=460,
+        plot_bgcolor=PLOT_BG,
+        paper_bgcolor=PLOT_BG,
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis=dict(title="Date", gridcolor=PLOT_GRID, color="#374151"),
+        yaxis=dict(title="Predicted Sales", gridcolor=PLOT_GRID, color="#374151"),
+    )
+    st.plotly_chart(forecast_chart, use_container_width=True)
